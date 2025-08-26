@@ -6,10 +6,16 @@ import { X } from "lucide-react"
 
 export default function AuthPopup({ onClose, onSuccess }) {
   useEffect(() => {
-    // Initialize Google Sign-In
+    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    
+    if (!googleClientId) {
+      console.error("Google Client ID is not configured");
+      return;
+    }
+
     if (window.google) {
       window.google.accounts.id.initialize({
-        client_id: "619939042673-0kia60agj3l2u2sf3s7ad0md1k75l0hj.apps.googleusercontent.com",
+        client_id: googleClientId,
         callback: handleCredentialResponse,
         auto_prompt: false,
       })
@@ -27,7 +33,6 @@ export default function AuthPopup({ onClose, onSuccess }) {
 
   const handleCredentialResponse = async (response) => {
     try {
-      // Send the credential to your backend
       const res = await fetch("/api/auth/google", {
         method: "POST",
         headers: {
@@ -41,7 +46,6 @@ export default function AuthPopup({ onClose, onSuccess }) {
       const data = await res.json()
 
       if (data.success) {
-        // Set token in cookie
         document.cookie = `token=${data.token}; path=/; max-age=${7 * 24 * 60 * 60}` // 7 days
         onSuccess(data.user)
       } else {
@@ -52,8 +56,13 @@ export default function AuthPopup({ onClose, onSuccess }) {
     }
   }
 
-  // Make handleCredentialResponse available globally
-  window.handleCredentialResponse = handleCredentialResponse
+  useEffect(() => {
+    window.handleCredentialResponse = handleCredentialResponse;
+    
+    return () => {
+      delete window.handleCredentialResponse;
+    };
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 auth-popup">

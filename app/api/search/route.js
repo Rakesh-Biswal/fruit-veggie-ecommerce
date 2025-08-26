@@ -3,9 +3,11 @@ import { NextResponse } from 'next/server'
 const API_BASE_URL = "https://vegfru-api.vercel.app/api"
 
 export async function GET(request) {
+  let query = ''
+  
   try {
     const { searchParams } = new URL(request.url)
-    const query = searchParams.get('q')
+    query = searchParams.get('q') || ''
 
     if (!query || query.length < 2) {
       return NextResponse.json([])
@@ -52,5 +54,11 @@ function getMockSuggestions(query) {
     "Bottle Gourd",
   ]
 
-  return suggestions.filter((item) => item.toLowerCase().includes(query.toLowerCase())).slice(0, 8)
+  if (!query) {
+    return []
+  }
+
+  return suggestions
+    .filter((item) => item.toLowerCase().includes(query.toLowerCase()))
+    .slice(0, 8)
 }

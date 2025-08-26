@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb"
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/freshmart"
+const MONGODB_URI = process.env.MONGODB_URI
 
 async function setupDatabase() {
   try {
